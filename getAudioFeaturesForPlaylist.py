@@ -9,8 +9,9 @@ from json.decoder import JSONDecodeError
 from spotipy.oauth2 import SpotifyClientCredentials
 from pymongo import MongoClient
 
-playlist_id = sys.argv[1]
+playlist_id = sys.argv[1] # exemplo "4mKsMyOuYluG5XiUSpNClb"
 playlist_tracks = []
+playlist_track_ids = []
 
 #Autenticação depende de variaveis de ambiente:
 #SPOTIPY_CLIENT_ID
@@ -18,9 +19,9 @@ playlist_tracks = []
 #SPOTIPY_REDIRECT_URI
 spotify = spotipy.Spotify(auth_manager = SpotifyClientCredentials())
 
-results = spotify.playlist(playlist_id, fields="name,tracks")#search(q="name:Mixolydian", type='playlist')
+tracks_from_api = spotify.playlist(playlist_id, fields="name,tracks")#search(q="name:Mixolydian", type='playlist')
 
-for item in results['tracks']['items']:
+for item in tracks_from_api['tracks']['items']:
     trackObject = {}
     trackObject['track_id'] = item['track']['id']
     trackObject['name'] = item['track']['name']
@@ -45,8 +46,34 @@ for item in results['tracks']['items']:
     trackObject['melodic_variation'] = '' #info not in this object
 
     playlist_tracks.append(trackObject)
+    playlist_track_ids.append(trackObject['track_id'])
 
-#print(json.dumps(playlist_tracks, sort_keys=True, indent=4))
+audio_features_from_api = spotify.audio_features(playlist_track_ids)
+
+# Isso aqui era só um teste para ver como ia ser a saída
+# contador = 0
+# for track, feature in zip(playlist_tracks, audio_features_from_api):
+#     contador = contador + 1
+#     if track['track_id'] == feature['id']:
+#         print(f"musica {contador}/{len(playlist_tracks)} tem id igual")
+#     else:
+#         print(f"musica {contador}/{len(playlist_tracks)} tem id diferente")
+
+for track, feature in zip(playlist_tracks, audio_features_from_api):
+    if track['track_id'] == feature['id']:
+        track['key'] = feature['key']
+        track['mode'] = feature['mode'] #info not in this object
+        track['time_signature'] = feature['time_signature'] #info not in this object
+        track['tempo'] = feature['tempo'] #info not in this object
+        track['instrumentalness'] = feature['instrumentalness'] #info not in this object
+        track['speechiness'] = feature['speechiness'] #info not in this object
+        track['acousticness'] = feature['acousticness'] #info not in this object
+        track['energy'] = feature['energy'] #info not in this object
+        track['danceability'] = feature['danceability'] #info not in this object
+        track['valence'] = feature['valence'] #info not in this object
+
+
+# print(json.dumps(audio_features_from_api, sort_keys=True, indent=4))
 
 client = MongoClient("mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false")
 track_collection = client['perceptool-v0']['tracks']
