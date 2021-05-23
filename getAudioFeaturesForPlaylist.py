@@ -9,7 +9,7 @@ from json.decoder import JSONDecodeError
 from spotipy.oauth2 import SpotifyClientCredentials
 from pymongo import MongoClient
 
-playlist_id = sys.argv[1] # exemplo "4mKsMyOuYluG5XiUSpNClb"
+playlist_id = "4mKsMyOuYluG5XiUSpNClb" #sys.argv[1] # exemplo "4mKsMyOuYluG5XiUSpNClb"
 playlist_tracks = []
 playlist_track_ids = []
 
@@ -50,27 +50,18 @@ for item in tracks_from_api['tracks']['items']:
 
 audio_features_from_api = spotify.audio_features(playlist_track_ids)
 
-# Isso aqui era só um teste para ver como ia ser a saída
-# contador = 0
-# for track, feature in zip(playlist_tracks, audio_features_from_api):
-#     contador = contador + 1
-#     if track['track_id'] == feature['id']:
-#         print(f"musica {contador}/{len(playlist_tracks)} tem id igual")
-#     else:
-#         print(f"musica {contador}/{len(playlist_tracks)} tem id diferente")
-
 for track, feature in zip(playlist_tracks, audio_features_from_api):
     if track['track_id'] == feature['id']:
         track['key'] = feature['key']
-        track['mode'] = feature['mode'] #info not in this object
-        track['time_signature'] = feature['time_signature'] #info not in this object
-        track['tempo'] = feature['tempo'] #info not in this object
-        track['instrumentalness'] = feature['instrumentalness'] #info not in this object
-        track['speechiness'] = feature['speechiness'] #info not in this object
-        track['acousticness'] = feature['acousticness'] #info not in this object
-        track['energy'] = feature['energy'] #info not in this object
-        track['danceability'] = feature['danceability'] #info not in this object
-        track['valence'] = feature['valence'] #info not in this object
+        track['mode'] = feature['mode']
+        track['time_signature'] = feature['time_signature']
+        track['tempo'] = feature['tempo']
+        track['instrumentalness'] = feature['instrumentalness']
+        track['speechiness'] = feature['speechiness']
+        track['acousticness'] = feature['acousticness']
+        track['energy'] = feature['energy']
+        track['danceability'] = feature['danceability']
+        track['valence'] = feature['valence']
 
 
 # print(json.dumps(audio_features_from_api, sort_keys=True, indent=4))
